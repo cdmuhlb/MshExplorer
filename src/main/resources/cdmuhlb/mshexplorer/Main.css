@@ -1,0 +1,20 @@
+.spiral-path {
+  -fx-stroke: white;
+  -fx-stroke-width: 3;
+  -fx-stroke-line-join: round;
+  -fx-stroke-line-cap: round;
+}
+
+.spiral-circle {
+  -fx-fill: white;
+  -fx-cursor: hand;
+}
+
+.wheel-panel {
+  -fx-background-color: black;
+}
+
+.spec-txt {
+  -fx-fill: white;
+  -fx-font-size: 24pt;
+}
