@@ -14,3 +14,12 @@ __MshExplorer__ is written in Scala and Java and uses JavaFX.  It therefore
 requires a Java SE 7 (or later) JDK and JavaFX 2.2 (`jfxrt.jar` is expected to
 live in `$JAVA_HOME/jre/lib`).  Building __MshExplorer__ requires an
 [SBT](http://www.scala-sbt.org/) launcher compatible with version 0.13.1.
+
+Performance
+-----------
+
+Currently, raster computations and rendering are performed on the JavaFX
+Application thread.  Unfortunately, these operations are expensive even for
+moderate resolutions, and this causes the the UI to become unresponsive.  This
+is particularly noticable when using the slider to modify M.  Future
+improvements will move this work to another thread (ideally multiple threads).
