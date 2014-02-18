@@ -27,15 +27,10 @@ class Main extends Application {
     val group = new Group
     val wheel = new MshWheel(640, 640, spec)
     group.getChildren.add(wheel)
-    val traj = new SpiralTrajectory(511)
+    val traj = new SpiralTrajectory(511, spec)
     traj.widthProperty.bind(wheel.widthProperty)
     traj.heightProperty.bind(wheel.heightProperty)
     group.getChildren.add(traj)
-
-    // mProperty is bound to slider below
-    spec.s0Property.bind(traj.s0Property)
-    spec.h0Property.bind(traj.h0Property)
-    spec.hRateProperty.bind(traj.hRateProperty)
 
     val txtBox = new VBox
     txtBox.setMouseTransparent(true)
@@ -49,13 +44,18 @@ class Main extends Application {
         spec.s0Property.asString("%.3g")))
     s0Txt.getStyleClass.add("spec-txt")
     txtBox.getChildren.add(s0Txt)
+    val sfTxt = new Text
+    sfTxt.textProperty.bind(Bindings.concat("sf = ",
+        spec.sfProperty.asString("%.3g")))
+    sfTxt.getStyleClass.add("spec-txt")
+    txtBox.getChildren.add(sfTxt)
     val h0Txt = new Text
     h0Txt.textProperty.bind(Bindings.concat("h0 = ",
         spec.h0Property.asString("%.3g")))
     h0Txt.getStyleClass.add("spec-txt")
     txtBox.getChildren.add(h0Txt)
     val hRateTxt = new Text
-    hRateTxt.textProperty.bind(Bindings.concat("h0 = ",
+    hRateTxt.textProperty.bind(Bindings.concat("hRate = ",
         spec.hRateProperty.asString("%.3g")))
     hRateTxt.getStyleClass.add("spec-txt")
     txtBox.getChildren.add(hRateTxt)

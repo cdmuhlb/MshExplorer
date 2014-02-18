@@ -9,7 +9,7 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.paint.Color
 import javafx.scene.shape.{Circle, LineTo, MoveTo, Path}
 
-class SpiralTrajectory(nLines: Int) extends Parent {
+class SpiralTrajectory(nLines: Int, spec: MshSpiralSpec) extends Parent {
   private val start = new MoveTo
   private val lines = new java.util.ArrayList[LineTo](nLines)
   for (i <- 1 to nLines) lines.add(new LineTo)
@@ -23,21 +23,6 @@ class SpiralTrajectory(nLines: Int) extends Parent {
   final def getHeight: Double = height.get
   final def setHeight(value: Double): Unit = height.set(value)
   def heightProperty: DoubleProperty = height
-
-  private val s0 = new SimpleDoubleProperty(0.25*math.Pi)
-  final def getS0: Double = s0.get
-  final def setS0(value: Double): Unit = s0.set(value)
-  def s0Property: DoubleProperty = s0
-
-  private val h0 = new SimpleDoubleProperty(0.0)
-  final def getH0: Double = h0.get
-  final def setH0(value: Double): Unit = h0.set(value)
-  def h0Property: DoubleProperty = h0
-
-  private val hRate = new SimpleDoubleProperty(2.0)
-  final def getHRate: Double = hRate.get
-  final def setHRate(value: Double): Unit = hRate.set(value)
-  def hRateProperty: DoubleProperty = hRate
 
   private val path = new Path
   path.getStyleClass.add("spiral-path")
@@ -56,7 +41,7 @@ class SpiralTrajectory(nLines: Int) extends Parent {
     private var originX: Double = 0.5*getWidth
     private var originY: Double = 0.5*getHeight
     private var originPhi: Double = 0.0
-    private var originRate: Double = getHRate
+    private var originRate: Double = spec.getHRate
 
     override def handle(event: MouseEvent): Unit = {
       val x = event.getX
@@ -69,7 +54,7 @@ class SpiralTrajectory(nLines: Int) extends Parent {
           originY = y
           originPhi = math.atan2(x - cx, y - cy)
           //originPhi = getH0  // incompatible with ro
-          originRate = getHRate
+          originRate = spec.getHRate
         case MouseEvent.MOUSE_DRAGGED =>
           val rMax = 0.5*getWidth.min(getHeight)
           val dxo = x - originX
@@ -77,7 +62,7 @@ class SpiralTrajectory(nLines: Int) extends Parent {
           val ro = math.hypot(dxo, dyo)
           val phi = math.atan2(x - cx, y - cy)
           val deltaRate = 5.0*ro/rMax*math.sin(originPhi - phi)
-          setHRate(originRate + deltaRate)
+          spec.setHRate(originRate + deltaRate)
       }
     }
   }
@@ -101,8 +86,28 @@ class SpiralTrajectory(nLines: Int) extends Parent {
       val dy = i - cy
       val r = math.hypot(dx, dy)
       val phi = math.atan2(dy, dx)
-      setS0(0.5*math.Pi*r/rMax)
-      setH0(phi)
+      spec.setS0(0.5*math.Pi*r/rMax)
+      spec.setH0(phi)
+    }
+  })
+
+  private val tail = new Circle(5)
+  tail.getStyleClass.add("spiral-circle")
+  tail.centerXProperty.bind(lines.get(nLines-1).xProperty)
+  tail.centerYProperty.bind(lines.get(nLines-1).yProperty)
+  getChildren.add(tail)
+
+  tail.setOnMouseDragged(new EventHandler[MouseEvent] {
+    override def handle(event: MouseEvent): Unit = {
+      val i = event.getY
+      val j = event.getX
+      val cx = 0.5*(getWidth - 1.0)
+      val cy = 0.5*(getHeight - 1.0)
+      val rMax = 0.5*getWidth.min(getHeight)
+      val dx = j - cx
+      val dy = i - cy
+      val r = math.hypot(dx, dy)
+      spec.setSf(0.5*math.Pi*r/rMax)
     }
   })
 
@@ -112,17 +117,13 @@ class SpiralTrajectory(nLines: Int) extends Parent {
       val cy = 0.5*(getHeight - 1.0)
       val rMax = 0.5*getWidth.min(getHeight)
 
-      val r0 = (2.0/math.Pi)*rMax*getS0
-      start.setX(cx + r0*math.cos(getH0))
-      start.setY(cy + r0*math.sin(getH0))
+      val r0 = (2.0/math.Pi)*rMax*spec.getS0
+      start.setX(cx + r0*math.cos(spec.getH0))
+      start.setY(cy + r0*math.sin(spec.getH0))
 
       for (k <- 1 to nLines) {
         val z = k.toDouble / nLines
-        val s = getS0*(1.0 - z)
-        val h = if (s == 0.0) 0.0 else if (s >= 0.5*math.Pi) getH0 else {
-          (getH0 + getHRate*math.log(math.tan(0.5*getS0))/getS0) -
-              getHRate*math.log(math.tan(0.5*s))/getS0
-        }
+        val (s, h) = spec.mapToSH(z)
         val r = s*rMax*(2.0/math.Pi)
         val line = lines.get(k - 1)
         line.setX(cx + r*math.cos(h))
@@ -133,7 +134,8 @@ class SpiralTrajectory(nLines: Int) extends Parent {
 
   widthProperty.addListener(updater)
   heightProperty.addListener(updater)
-  s0Property.addListener(updater)
-  h0Property.addListener(updater)
-  hRateProperty.addListener(updater)
+  spec.s0Property.addListener(updater)
+  spec.sfProperty.addListener(updater)
+  spec.h0Property.addListener(updater)
+  spec.hRateProperty.addListener(updater)
 }
