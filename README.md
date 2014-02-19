@@ -7,6 +7,10 @@ trajectories with constant M and linear s.  The parameters of these trajectories
 can then be used to construct colormaps for data visualization (see the
 `MshRainbow` colormap in __DgView__ for an example).
 
+For more information on the Msh colorspace and perceptual uniformity in
+colormaps, see
+[Diverging Color Maps for Scientific Visualization](http://www.sandia.gov/~kmorel/documents/ColorMaps/ColorMaps.pdf).
+
 Dependencies
 ------------
 
