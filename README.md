@@ -9,7 +9,7 @@ can then be used to construct colormaps for data visualization (see the
 
 For more information on the Msh colorspace and perceptual uniformity in
 colormaps, see
-[Diverging Color Maps for Scientific Visualization](http://www.sandia.gov/~kmorel/documents/ColorMaps/ColorMaps.pdf).
+[Diverging Color Maps for Scientific Visualization](http://www.sandia.gov/~kmorel/documents/ColorMaps/).
 
 Dependencies
 ------------
